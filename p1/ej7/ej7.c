@@ -27,7 +27,7 @@ int main(){
     case 0:
       signal(SIGUSR1, tratarSennal); //Cuando reciba una señal de tipo SIGUSR1, ejecutara tratarSennal
       for(int i=0; i<5; i++){
-        pause();
+        pause(); //It shall suspend the calling thread until delivery of a signal whose action is either to execute a signal-catching function or to terminate the process.
       }
     exit(EXIT_SUCCESS);
 
@@ -42,7 +42,7 @@ int main(){
       sleep(1);
       kill(id, SIGKILL); //Mandamos a id (proceso hijo) la señal SIGKILL para que la casque
       wait(&status);
-      printf("Chiquillo finalizado con código de salida %d \n", WEXITSTATUS(status));
+      printf("Hijo finalizado con código de salida %d \n", WEXITSTATUS(status));
   }
 
 return 0;
