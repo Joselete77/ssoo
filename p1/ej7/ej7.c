@@ -29,6 +29,7 @@ int main(){
       for(int i=0; i<5; i++){
         pause(); //It shall suspend the calling thread until delivery of a signal whose action is either to execute a signal-catching function or to terminate the process.
       }
+      sleep(1);
     exit(EXIT_SUCCESS);
 
     default:
@@ -41,6 +42,7 @@ int main(){
 
       sleep(1);
       kill(id, SIGKILL); //Mandamos a id (proceso hijo) la señal SIGKILL para que la casque
+      sleep(10);//Si ponemos este sleep, el proceso hijo se queda en modo zombie esperando a ser recogido por el padre
       wait(&status);
       printf("Hijo finalizado con código de salida %d \n", WEXITSTATUS(status));
   }
