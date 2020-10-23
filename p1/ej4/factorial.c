@@ -22,7 +22,7 @@ int main( int argc, char const *argv[]){
         printf("%d \n", fact); //Se muestra cada iteración
         
     }
-
+    sleep(1);
     printf("El factorial de %d es %d \n", n, fact);
     return 0;
 
