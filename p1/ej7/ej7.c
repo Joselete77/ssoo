@@ -40,7 +40,7 @@ int main(){
           // Cuando llamamos a kill, manda a id la señal SIGUSR1
       }
 
-      sleep(1);
+      sleep(1);//Si quitamos este sleep, matamos al proceso hijo antes de que le de tiempo a imprimir el mensaje numero 5
       kill(id, SIGKILL); //Mandamos a id (proceso hijo) la señal SIGKILL para que la casque
       sleep(10);//Si ponemos este sleep, el proceso hijo se queda en modo zombie esperando a ser recogido por el padre
       wait(&status);
