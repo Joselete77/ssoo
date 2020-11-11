@@ -1,100 +1,106 @@
 //ej3.c
-//Este ejercicio creara un vector de 10 elementos relleno con numeros aleatorios entre 1 y 9, y usando hebras suma sus valores
+//Este ejercicio creara un vector de 10 elementos relleno con numeros aleatorios entre 1 y 9, y usando hebras se sumaran sus valores
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <pthread.h>
 #include <errno.h>
 
-typedef struct {    //Estructura matriz que pasaremos a las funciones que manejan los hilos
-  int **matriz;     //Matriz
-  int nFil;         //Filas de la matriz
-  int nCol;         //Columnas de la matriz
-  int i;            //Iterador para acceder a los diferentes vectores de la matriz
-} matriz;
+typedef struct {        //Estructura matriz que pasaremos a las funciones que manejan los hilos
+  int *vector;          //Vector
+  int hebras;           //Hebras
+  int i;                //Iterador
+} Vector;
 
 
-int ** reservarMemoria(int nFil, int nCol){             //Reservamos memoria para la matriz
-	int **matriz;
-	matriz = (int **)malloc (nFil*sizeof(int *));       //Reservamos memoria para el vector de filas
-	for (int i=0;i<nFil;i++){
-		matriz[i] = (int *) malloc (nCol*sizeof(int));  //Reservamos memoria para los vectores de las columnas
-	}
-	return matriz;                                      //Devolvemos la matriz
-}
-
-
-void rellenaMatriz(int **matriz, int nFil, int nCol){   //Rellenamos la matriz de numeros aleatorios del 1 al 9
+void rellenaVector(int *vector){                //Rellenamos el vector de numeros aleatorios del 1 al 9
   srand(time(NULL));                                    
-	for (int i = 0; i < nFil; ++i){
-		for (int j = 0; j < nCol; ++j){
-			matriz[i][j] = ((rand()%9)+1);             
-		}
+	for (int i = 0; i < 10; ++i){
+		vector[i] = ((rand()%9)+1);
 	}
 }
 
-void imprimeMatriz (int **matriz, int nFil, int nCol){  //Imprimimos los elementos de la matriz
-	printf("La matriz es:\n");
-	for (int i = 0; i < nFil; ++i){
-		printf("|");
-		for (int j = 0; j < nCol; ++j){
-			printf(" %d ",matriz[i][j]);
-		}
-		printf("|\n");
+void imprimeVector (int *vector){               //Imprimimos los elementos del vector
+	printf("El vector es:\n");
+	printf("| ");
+	for (int i = 0; i < 10; ++i){
+		printf("%d | ",vector[i]);
 	}
+	printf("\n");
+
 }
 
 
-void * sumaVector (void* d){            //Esta será la función que ejecuten las hebras.
+void * sumaVector (void* d){                    //Esta será la función que ejecuten las hebras.
 
-    int *suma = malloc(sizeof(int));    //Reservamos memoria para un puntero de tipo int
-    *suma = 0;                          //Como lo vamos a usar de contador lo ponemos a 0
+    int *suma = malloc(sizeof(int));            //Reservamos memoria para un puntero de tipo int
+    *suma = 0;                                  //Como lo vamos a usar de sumador lo ponemos a 0
     
-    matriz *m;                          
-    m = (matriz*) d;
+    Vector *v;                                  //Declaramos una estructura de tipo vector              
+    v = (Vector*) d;                            //Hacemos casting de void a vector
     
-    int n = ++m->i;                     //Almacenamos el valor de i en n con el objetivo de tener el resto de hebras el menor tiempo posible bloqueadas ya que la otra opción es trabajar con i directamente y mantenerlas bloqueadas mientras se ejecuta el bucle
-    for (int j = 0; j < m->nCol; j++){
-        *suma += m->matriz[n][j];       //Accedemos únicamente a las columnas de la fila i de la matriz lo que equivale a uno de los vectores
+    if(v->hebras == 2){                         //SI EL USUARIO QUIERE HACER 2 HEBRAS, SOLO ENTRAREMOS EN ESTE IF EN LAS 2 HEBRAS QUE LLAMAMOS
+        int j=v->i;
+        for(j; j<(v->i)+5; j++){                //SI EL USUARIO QUIERE HACER 2 HEBRAS, TENDREMOS QUE HACER EL PROCESO DESDE LA POSICION VECTOR[0] A VECTOR[4] PARA EMPEZAR
+            *suma = *suma + v->vector[j];
+        }
+        v->i = v->i + 5;
+        pthread_exit((void**)suma);             //Devolvemos la suma 
     }
 
-	pthread_exit((void**) suma);        //Devolvemos el valor del numero de lineas con pthread_exit
+    else{                                       //SI EL USUARIO QUIERE HACER 5 HEBRAS, SOLO ENTRAREMOS EN ESTE ELSE EN LAS 5 HEBRAS QUE LLAMAMOS
+        int j=v->i;
+        for(j; j<(v->i)+2; j++){                //SI EL USUARIO QUIERE HACER 5 HEBRAS, TENDREMOS QUE HACER EL PROCESO DESDE LA POSICION VECTOR[0] A VECTOR[1] PARA EMPEZAR
+            *suma = *suma + v->vector[j];
+        }
+        v->i = v->i + 2;
+        pthread_exit((void**)suma);             //Devolvemos la suma 
+    }
 }
+
 
 int main(int argc, char const *argv[]){
   
-    matriz *m = malloc(sizeof(matriz));
-    m->i=-1;                                                //Partimos de -1 para que en la primera iteracion al entrarnen la funcion, valga 0
-    m->nFil = atoi(argv[1]);                                //Guardamos en nFil el número pasado como argumento ya que este será el numero de filas de la matriz de numeros y el numero de hilos que generaremos
+    Vector *v = malloc(sizeof(Vector));                 //Reservamos memoria para una estructura de tipo Vector
     
-    if (argc < 2 || (m->nFil != 2 && m->nFil != 5)){        //Comprobamos que se haya llamado al programa de forma adecuada
+    if (argc != 2){                                     //Comprobamos que se haya llamado al programa de forma adecuada introduciendo 2 argumentos. Hacemos este if primero para evitar un segmentation fault en la linea 79
         printf("Error, llame al programa asi:\n");
         printf("./ej3 2 o /ej3 5\n");
+        exit(EXIT_FAILURE);
+    }
+
+    v->hebras = atoi(argv[1]);                          //Guardamos en v->hebras el numero de hebras que queremos hacer
+    v->i = 0;                                           //Ponemos el iterador a 0 para luego en la funcion sumaVector comenzar desde la posicion 0 del vector 
+
+    if (v->hebras != 2 && v->hebras != 5){              //Comprobamos que se haya llamado al programa de forma adecuada introduciendo un 2 o un 5
+        printf("Error, llame al programa asi:\n");
+        printf("./ej3 2 o /ej3 5\n");
+        exit(EXIT_FAILURE);
     }
     
-    m->nCol = 10/m->nFil;                                   //Creamos un puntero para la matriz y definimos el número de columnas que será 10/nFil
-    m->matriz = reservarMemoria (m->nFil, m->nCol);         //Reservamos memoria para la matriz
+    v->vector = (int *)malloc (10*sizeof(int));         //Reservamos memoria para el vector
 
-    rellenaMatriz(m->matriz, m->nFil, m->nCol);             //Rellenamos la matriz con numeros aleatorios del 1 al 9
-    imprimeMatriz(m->matriz, m->nFil, m->nCol);             //Imprimimos la matriz para comprobar luego el resultado
+    rellenaVector(v->vector);                           //Rellenamos el vector con numeros aleatorios del 1 al 9
+    imprimeVector(v->vector);                           //Imprimimos el vector para comprobar luego el resultado
 
-    pthread_t thread[m->nFil];                              //Creamos un vector para almacenar los identificadores de los hilos
-    int *ret, suma = 0;                                     //ret es el puntero que recibirá los valores devueltos por los hilos, suma almacenará la suma de los valores devueltos por los hilos
+    pthread_t thread[v->hebras];                        //Creamos un vector para almacenar los identificadores de los hilos, que seran 2 o 5 segun haya indicado el usuario
+    int *sumaLinea, suma = 0;                           //sumaLinea es el puntero que recibirá los valores devueltos por los hilos, suma almacenará la suma de los 10 valores del vector
     
-    for (int i = 0; i < m->nFil; i++){                      //Crearemos tantos hilos como filas tenga la matriz
+    printf("Se pasaran a crear %d hebras para sumar los valores del vector\n", v->hebras);
+
+    for (int i = 0; i < v->hebras; i++){                //Crearemos tantos hilos como haya indicado el usuario por linea de argumentos
         
-        if(pthread_create(&(thread[i]), NULL, (void*) sumaVector, (void*) m)){
+        if(pthread_create(&(thread[i]), NULL, (void*) sumaVector, (void*) v)){
             printf("Error en la creacion de la hebra. Codigo de error %d\n", errno);
             exit(EXIT_FAILURE);
-        
         }
 
-        if(pthread_join(thread[i], (void**) &ret)){
+        if(pthread_join(thread[i], (void**) &sumaLinea)){
             printf("Error al esperar la hebra. Codigo de error %d\n", errno);
             exit(EXIT_FAILURE);
         } 
 
-        suma = suma + *ret;                                 //En cada iteración del bucle sumamos el valor devuelto por la hebra recogida
+        suma = suma + *sumaLinea;                       //En cada iteración del bucle sumamos el valor devuelto por la hebra recogida a la suma total de valores
     }
 
     printf("La suma de los numeros de todos los valores es: %d\n", suma);
