@@ -24,7 +24,7 @@ void imprimeVector (int *vector){               //Imprimimos los elementos del v
 	printf("El vector es:\n");
 	printf("| ");
 	for (int i = 0; i < 10; ++i){
-		printf("%d | ",vectmatrizor[i]);
+		printf("%d | ",vector[i]);
 	}
 	printf("\n");
 
