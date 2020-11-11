@@ -6,7 +6,7 @@
 #include <pthread.h>
 #include <errno.h>
 
-typedef struct {        //Estructura vector que pasaremos a las funciones que manejan los hilos
+typedef struct {        //Estructura vector que pasaremos a las funciones que manejan los hilos 
   int *vector;          //Vector
   int hebras;           //Hebras
   int i;                //Iterador
@@ -24,7 +24,7 @@ void imprimeVector (int *vector){               //Imprimimos los elementos del v
 	printf("El vector es:\n");
 	printf("| ");
 	for (int i = 0; i < 10; ++i){
-		printf("%d | ",vector[i]);
+		printf("%d | ",vectmatrizor[i]);
 	}
 	printf("\n");
 
@@ -78,8 +78,7 @@ int main(int argc, char const *argv[]){
         exit(EXIT_FAILURE);
     }
     
-    v->vector = (int *)malloc (10*sizeof(int));         //Reservamos memoria para el vector
-
+    v->vector = (int *)malloc (10*sizeof(int));         //Reservamos memoria para el vector v->vector
     rellenaVector(v->vector);                           //Rellenamos el vector con numeros aleatorios del 1 al 9
     imprimeVector(v->vector);                           //Imprimimos el vector para comprobar luego el resultado
 
