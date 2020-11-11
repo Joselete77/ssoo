@@ -1,7 +1,7 @@
 //ej1.c
 //Este ejercicio creara n hebras, creando cada una de ellas 2 valores aleatorios e imprimiendo el sumatorio de todos ellos al final del programa
 //Pide macros definidas (????)
-//Hace falta hacer malloc????
+//Por que hacer malloc?
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -9,21 +9,21 @@
 #include <time.h>
 #include <errno.h>
 
-int errno;              //La creo aqui para que no me salga que errno esta undefined
 
-void * valores_aleatorios(int *sumatorio){              //Funcion que genera y suma dos numeros aleatorios
+void * valores_aleatorios(){                            //Funcion que genera y suma dos numeros aleatorios
     
-    int x=1+rand()%9;                                   //Generamos un numero aleatorio del 1 al 9
-    printf("Valor de x= %d\n", x);
+    float x = (float)rand()/(float)(RAND_MAX);          //Generamos un numero aleatorio flotante
+    printf("Valor de x= %f\n", x);
 
-    int y=1+rand()%9;                                   //Generamos un numero aleatorio del 1 al 9
-    printf("Valor de y= %d\n", y);
+    float y = (float)rand()/(float)(RAND_MAX);          //Generamos un numero aleatorio flotante
+    printf("Valor de y= %f\n", y);
     
-    printf("Suma de la hebra actual = %d\n", x+y);
+    printf("Suma de la hebra actual = %f\n", x+y);
 
-    *sumatorio = *sumatorio +x+y;                       //Incrementamos la suma de los valores totales obtenidos
+    float *z = malloc(sizeof(float));                   //Reservamos memoria para un flotante
+    *z = y + x;                                         //Suma de los valores obtenidos
 
-    pthread_exit(NULL);                                 //Salimos de la hebra
+    pthread_exit((void*)z);                             //Salimos de la hebra devolviendo la suma de los valores generados
 
 }
 
@@ -34,24 +34,26 @@ int main(){
     
     srand(time(NULL));                  //Plantamos la semilla del numero aleatorio
     
-    pthread_t thread[n];                //Creamos un vector para almacenar el valor de los hilos
+    pthread_t thread[n];                //Creamos un vector para almacenar los identificadores de los hilos
 
-    int suma=0;                         //Establecemos que al comenzar la suma de valores valga 0
-
+    float suma=0;                       //Establecemos que al comenzar la suma de valores valga 0
+    float * sumaHebra=0;
     for (int i=0; i<n; i++){            //Entraremos en el bucle tantas veces como hebras creemos
         
-        if (pthread_create(&(thread[i]), NULL, (void *) valores_aleatorios, &suma)){        //Si la creacion de la hebra nos devuelve algo distinto a 0, habra ocurrido un error
+        if (pthread_create(&(thread[i]), NULL, (void *) valores_aleatorios, NULL)){         //Si la creacion de la hebra nos devuelve algo distinto a 0, habra ocurrido un error
             printf("Error en la creacion de la hebra. Codigo de error %d\n", errno);
             exit(EXIT_FAILURE);
         }
         printf("Creacion de la hebra %d\n", i+1);
 
-        if (pthread_join(thread[i], NULL)){                                                 //Si la espera de la hebra nos devuelve algo distinto a 0, habra ocurrido un error
+        if (pthread_join(thread[i], (void **)&sumaHebra)){                                  //Si la espera de la hebra nos devuelve algo distinto a 0, habra ocurrido un error
             printf("Error al esperar la hebra. Codigo de error %d\n", errno);
             exit(EXIT_FAILURE);
         }
+
+        suma = suma + *sumaHebra;                //Al final de cada hebra aumentamos la suma de los valores obtenidos sumandole los de la hebra recien finalizada
     }
-        printf("Suma total = %d\n",suma);       //Imprimimos finalmente el sumatorio de todos los valores creados por las n hebras
+        printf("Suma total = %f\n", suma);       //Imprimimos finalmente el sumatorio de todos los valores creados por las n hebras
         exit (EXIT_SUCCESS);
         
 }
