@@ -7,7 +7,7 @@ void * hebra(void *x_void_ptr)
 	//incrementar x hasta 100
 	int *x_ptr = (int *)x_void_ptr; 
    
-   printf("Soy la hebra hija, incrementando x, cuyo valor es %d\n", *x_ptr);
+	printf("Soy la hebra hija, incrementando x, cuyo valor es %d\n", *x_ptr);
 
 	while(*x_ptr < 100)
 	{
@@ -23,11 +23,11 @@ int main()
 {
 	int x = 0, y = 0;
 
-	//Declaración de una hebra
+	//Declaración de una hebra, NO CREACION
 	pthread_t hebra_incr;
 
 	printf("Soy la hebra principal, valor de variable x: %d\n", x);
-   printf("Soy la hebra principal, valor de variable y: %d\n", y);
+   	printf("Soy la hebra principal, valor de variable y: %d\n", y);
 	
 	//Creación de la hebra
 	if(pthread_create(&hebra_incr, NULL, (void *) hebra, (void*) &x)) 
@@ -55,4 +55,9 @@ int main()
 	printf("Soy la hebra principal, valor de x: %d\n",x);
 	printf("Soy la hebra principal, valor de y: %d\n",y);
 	exit(EXIT_SUCCESS);
+
+
+
 }
+
+
