@@ -6,7 +6,7 @@
 #include <pthread.h>
 #include <errno.h>
 
-typedef struct {        //Estructura matriz que pasaremos a las funciones que manejan los hilos
+typedef struct {        //Estructura vector que pasaremos a las funciones que manejan los hilos
   int *vector;          //Vector
   int hebras;           //Hebras
   int i;                //Iterador
