@@ -5,6 +5,7 @@
 #include <time.h>
 #include <pthread.h>
 #include <errno.h>
+#include <unistd.h>
 
 typedef struct {        //Estructura vector que pasaremos a las funciones que manejan los hilos 
   int *vector;          //Vector
@@ -32,28 +33,44 @@ void imprimeVector (int *vector){               //Imprimimos los elementos del v
 
 
 void * sumaVector (void* d){                    //Esta será la función que ejecuten las hebras.
-
+    
     int *suma = malloc(sizeof(int));            //Reservamos memoria para un puntero de tipo int
     *suma = 0;                                  //Como lo vamos a usar de sumador lo ponemos a 0
     
     Vector *v;                                  //Declaramos una estructura de tipo vector              
     v = (Vector*) d;                            //Hacemos casting de void a vector
     
+
+    //AÑADIR SEMAFOROS DENTRO DEL IF Y DEL ELSE PARA QUE EL FUNCIONAMIENTO SEA EL CORRECTO
+
     if(v->hebras == 2){                         //SI EL USUARIO QUIERE HACER 2 HEBRAS, SOLO ENTRAREMOS EN ESTE IF EN LAS 2 HEBRAS QUE LLAMAMOS
+        //Poner un entrar critica
+
         int j=v->i;
         for(j; j<(v->i)+5; j++){                //SI EL USUARIO QUIERE HACER 2 HEBRAS, TENDREMOS QUE HACER EL PROCESO DESDE LA POSICION VECTOR[0] A VECTOR[4] PARA EMPEZAR
+            printf("Hola, soy la hebra %lu\n", pthread_self());
             *suma = *suma + v->vector[j];
+            sleep(1);
         }
+
         v->i = v->i + 5;
+        //Poner un salir critica
         pthread_exit((void**)suma);             //Devolvemos la suma 
     }
 
     else{                                       //SI EL USUARIO QUIERE HACER 5 HEBRAS, SOLO ENTRAREMOS EN ESTE ELSE EN LAS 5 HEBRAS QUE LLAMAMOS
+        //Poner un entrar critica
+        
+        printf("Hola, soy la hebra %lu\n", pthread_self());
         int j=v->i;
         for(j; j<(v->i)+2; j++){                //SI EL USUARIO QUIERE HACER 5 HEBRAS, TENDREMOS QUE HACER EL PROCESO DESDE LA POSICION VECTOR[0] A VECTOR[1] PARA EMPEZAR
+            printf("Hola, soy la hebra %lu\n", pthread_self());
             *suma = *suma + v->vector[j];
+            sleep(1);
         }
+
         v->i = v->i + 2;
+        //Poner un salir critica
         pthread_exit((void**)suma);             //Devolvemos la suma 
     }
 }
@@ -93,7 +110,10 @@ int main(int argc, char const *argv[]){
             printf("Error en la creacion de la hebra. Codigo de error %d\n", errno);
             exit(EXIT_FAILURE);
         }
+    }
 
+    for (int i = 0; i < v->hebras; i++){                //Crearemos tantos hilos como haya indicado el usuario por linea de argumentos
+        
         if(pthread_join(thread[i], (void**) &sumaLinea)){
             printf("Error al esperar la hebra. Codigo de error %d\n", errno);
             exit(EXIT_FAILURE);
