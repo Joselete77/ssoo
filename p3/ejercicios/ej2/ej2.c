@@ -6,7 +6,6 @@
 #include <pthread.h>
 #include <errno.h>
 
-int indiceGlobal = 0;                                   //Indice de la hebra
 int par = 0;                                            //Suma de valores generados por los hilos pares
 int impar = 0;                                          //Suma de valores generados por los hilos impares
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;      //Mutex
@@ -24,8 +23,7 @@ void * suma(void * n){                                                          
         printf("Error en bloqueo de mutex. Codigo de error %d", errno);
         exit(EXIT_FAILURE);
     }
-
-        indiceGlobal++;                                                             //Aumentamos en uno el indiceGlobal, para que en la siguiente hebra se tenga el indice siguiente
+                                                         //Aumentamos en uno el indiceGlobal, para que en la siguiente hebra se tenga el indice siguiente
         printf("Hebra %ld con indice %d\n", pthread_self(), *indiceLocal);
         printf("Valor de la suma en %d es %d\n", *indiceLocal, *suma);              //Imprimimos por pantalla el valor de la suma de la hebra
 
@@ -56,16 +54,18 @@ int main( int argc, const char * argv[]){
     int n = atoi(argv[1]);                                  //Guardamos el numero de hebras que queremos crear en n
     int *resultado;                                         //Resultado donde guardaremos la suma de los valores generados por cada hebra
     pthread_t thread[n];                                    //Creamos un vector para guardar las n hebras 
+    int indiceGlobal[n];                                    //Indice de la hebra
 
     for(int i=0; i<n; i++){
-        if (pthread_create(&thread[i], NULL, suma, (void *) &indiceGlobal)){                    //Creacion de hebras con comprobacion de error
+        indiceGlobal[i]=i+1;                                                                        //Este será el indice que le pasaremos a la hebra para que esta sume a par o a impar
+        if (pthread_create(&thread[i], NULL, suma, (void *) &indiceGlobal[i])){                     //Creacion de hebras con comprobacion de error
             printf("Error, no se ha podido crear la hebra. Codigo de error %d\n", errno);
             exit(EXIT_FAILURE);
         }
     }
     
     for(int i=0; i<n; i++){
-        if (pthread_join(thread[i], (void **) &resultado )){                                    //Recogida de hebras con comprobacion de error
+        if (pthread_join(thread[i], (void **) &resultado )){                                        //Recogida de hebras con comprobacion de error
             printf("Error, no se ha podido recoger la hebra. Codigo de error %d\n", errno);
             exit(EXIT_FAILURE);
         }
